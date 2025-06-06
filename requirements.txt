@@ -1,0 +1,8 @@
+yfinance
+python-telegram-bot
+schedule
+python-dotenv
+flask
+pytz
+requests
+telegram
