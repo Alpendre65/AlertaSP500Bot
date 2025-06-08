@@ -1,8 +1,5 @@
-yfinance
-python-telegram-bot
-schedule
+requests
 python-dotenv
 flask
 pytz
-requests
-telegram
+python-telegram-bot==13.15
