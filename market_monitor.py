@@ -6,10 +6,10 @@ from typing import Optional, Dict
 logger = logging.getLogger(__name__)
 
 
-class SP500Monitor:
+class MarketMonitor:
 
-    def __init__(self):
-        self.symbol = "^GSPC"
+    def __init__(self, symbol: str):
+        self.symbol = symbol
         self.base_url = "https://query1.finance.yahoo.com/v8/finance/chart"
         self.headers = {"User-Agent": "Mozilla/5.0"}
 
@@ -25,7 +25,7 @@ class SP500Monitor:
             data = response.json()
             return self._parse_price_data(data)
         except Exception as e:
-            logger.error(f"Error fetching current S&P 500 price: {str(e)}")
+            logger.error(f"Error fetching price for {self.symbol}: {str(e)}")
             return None
 
     def _parse_price_data(self, data):
@@ -44,7 +44,7 @@ class SP500Monitor:
                 'timestamp': datetime.now()
             }
         except Exception as e:
-            logger.error(f"Error parsing S&P 500 data: {str(e)}")
+            logger.error(f"Error parsing data for {self.symbol}: {str(e)}")
             return None
 
     def get_top_movers(self) -> Dict:
