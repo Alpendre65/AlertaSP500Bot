@@ -1,6 +1,6 @@
 import time
 import logging
-from datetime import datetime
+from datetime import datetime, time as dt_time
 from dotenv import load_dotenv
 from sp500_monitor import SP500Monitor
 from telegram_bot import TelegramBot
@@ -47,33 +47,46 @@ def main():
     sp500_monitor = SP500Monitor()
     telegram_bot = TelegramBot(config.telegram_token, config.telegram_chat_id)
 
-    logger.info("S&P 500 Monitoring Bot started")
+    logger.info("Bot de monitoramento do S&P 500 iniciado")
     last_alert_hour = None
 
     while True:
         try:
             current_time = datetime.now()
             current_hour = current_time.hour
+            current_minute = current_time.minute
 
-            price_data = sp500_monitor.get_current_price()
+            # Horário de funcionamento da bolsa (horário de Lisboa)
+            market_open = dt_time(14, 30)
+            market_close = dt_time(21, 0)
 
-            if price_data:
-                logger.info(
-                    f"Current S&P 500 price: ${price_data['price']:.2f}")
+            if current_time.weekday(
+            ) < 5 and market_open <= current_time.time() <= market_close:
+                price_data = sp500_monitor.get_current_price()
 
-                if last_alert_hour != current_hour:
-                    movers_data = sp500_monitor.get_top_movers()
-                    message = format_alert_message(price_data, current_time,
-                                                   movers_data)
+                if price_data:
+                    logger.info(
+                        f"Preço atual do S&P 500 : $ {price_data['price']:.2f}"
+                    )
 
-                    if telegram_bot.send_message(message):
-                        last_alert_hour = current_hour
-                        logger.info(f"Alert sent for hour {current_hour}")
+                    if last_alert_hour != current_hour:
+                        movers_data = sp500_monitor.get_top_movers()
+                        message = format_alert_message(price_data,
+                                                       current_time,
+                                                       movers_data)
+
+                        if telegram_bot.send_message(message):
+                            last_alert_hour = current_hour
+                            logger.info(
+                                f"Alerta enviado para a hora {current_hour}")
+                else:
+                    logger.warning("Falha ao obter dados do S&P 500")
             else:
-                logger.warning("Failed to retrieve S&P 500 price data")
+                logger.info(
+                    "⏱ Fora do horário da bolsa - nenhuma mensagem enviada")
 
         except Exception as e:
-            logger.error(f"Error in main loop: {str(e)}")
+            logger.error(f"Erro no loop principal: {str(e)}")
 
         time.sleep(60)
 
@@ -81,3 +94,4 @@ def main():
 if __name__ == "__main__":
     keep_alive()
     main()
+
