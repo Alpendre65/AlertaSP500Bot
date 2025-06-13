@@ -27,3 +27,4 @@ class TelegramBot:
             logger.error(f"Erro ao enviar mensagem para o Telegram: {str(e)}")
             return False
 
+
