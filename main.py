@@ -8,18 +8,25 @@ from telegram_bot import TelegramBot
 import os
 from keep_alive import keep_alive
 
+# Carregar variáveis do .env
 load_dotenv()
 
+# Configurar logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler("market_bot.log"),
-              logging.StreamHandler()])
+    handlers=[
+        logging.FileHandler("market_bot.log"),
+        logging.StreamHandler()
+    ]
+)
 
 logger = logging.getLogger(__name__)
 
-bot = TelegramBot(os.getenv("TELEGRAM_TOKEN"), os.getenv("CHAT_ID"))
+# Inicializar bot com variáveis do ambiente
+bot = TelegramBot(os.getenv("TELEGRAM_TOKEN"), os.getenv("TELEGRAM_CHAT_ID"))
 
+# Dicionário com os índices e suas ações de referência
 indices = {
     "S&P 500": {
         "symbol": "^GSPC",
@@ -68,13 +75,11 @@ def main():
     while True:
         try:
             if is_market_open():
-                current_hour = datetime.now(
-                    pytz.timezone("Europe/Lisbon")).hour
+                current_hour = datetime.now(pytz.timezone("Europe/Lisbon")).hour
                 if current_hour != last_alert_hour:
                     messages = []
                     for name, data in indices.items():
-                        monitor = MarketMonitor(data["symbol"],
-                                                data["reference"])
+                        monitor = MarketMonitor(data["symbol"], data["reference"])
                         price = monitor.get_current_price()
                         movers = monitor.get_top_movers()
 
@@ -89,11 +94,9 @@ def main():
                 else:
                     logger.info("📩 Mensagem já enviada nesta hora")
             else:
-                logger.info(
-                    "⏰ Fora do horário da bolsa - nenhuma mensagem enviada")
+                logger.info("⏰ Fora do horário da bolsa - nenhuma mensagem enviada")
         except Exception as e:
             logger.error(f"❌ Erro no loop principal: {str(e)}")
-
         time.sleep(60)
 
 
