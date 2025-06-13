@@ -93,12 +93,14 @@ def main():
                     "⏰ Fora do horário da bolsa - nenhuma mensagem enviada")
         except Exception as e:
             logger.error(f"❌ Erro no loop principal: {str(e)}")
+
         time.sleep(60)
 
 
 if __name__ == "__main__":
     keep_alive()
     main()
+
 
 
 
